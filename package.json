@@ -17,5 +17,8 @@
   "bugs": {
     "url": "https://github.com/rohankumar-hub/FullStack-Journey/issues"
   },
-  "homepage": "https://github.com/rohankumar-hub/FullStack-Journey#readme"
+  "homepage": "https://github.com/rohankumar-hub/FullStack-Journey#readme",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
 }
