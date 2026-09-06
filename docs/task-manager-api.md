@@ -464,3 +464,28 @@ This separation makes the application easier to understand, test, and extend.
 ```
 
 The main goal of using `async/await` is to make asynchronous operations read in a linear and understandable way while still using Promises underneath.
+
+# Known Limitations
+
+## Concurrent modifications
+
+The application currently uses a JSON file as its data store.
+
+Operations that modify tasks follow a **read → modify → write** pattern. If multiple requests modify the tasks at nearly the same time, one write can overwrite another, resulting in a lost update.
+
+This is acceptable for this small learning project, but it would not be a reliable storage solution for a production application with concurrent users.
+
+A production application would typically use a database with appropriate concurrency control and transaction mechanisms.
+
+
+## Why I separated the API functions from UI functions
+
+I separated the API and UI responsibilities to reduce complexity, making it easier to understand what each part of the code is actually responsible for.
+
+The API communication responsibilities were separated into `createTask()`, `toggleTask()`, and `deleteTask()`.
+
+`createTaskUI()`, `updateTaskTitleStyle()`, `updateTaskStatus()`, and `updateToggleButton()` handle the DOM-related work.
+
+`addTaskToPage()` now creates the UI using `createTaskUI()` and sets up the toggle and delete event handlers, which use `toggleTask()` and `deleteTask()`.
+
+`addTaskToPage()` acts somewhat like a manager. It coordinates the different functions without implementing all of their internal work itself.

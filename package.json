@@ -2,9 +2,11 @@
   "name": "fullstack-journey",
   "version": "1.0.0",
   "description": "I am learning FullStack software engineering by building, shipping working in public and using AI as an engineering tool",
-  "main": "Hello.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node Hello.js"
+    "start": "node server.js",
+    "test": "node --test"
+
   },
   "repository": {
     "type": "git",

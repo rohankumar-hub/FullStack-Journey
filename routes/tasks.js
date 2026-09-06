@@ -1,113 +1,152 @@
 const express = require("express");
 
-const fs = require("fs");
-
-const taskService = require("../services/taskService")
+const taskService = require("../services/taskService");
 
 const router = express.Router();
 
-router.get("/tasks", (request, response) =>{
-    taskService.getTasks((err, tasks) =>{
-        if(err)
-        {  
-            return response.status(500).json({
-                success: false,
-                message: "server-side error"
-            })
-        }
-        response.json(tasks);
-    });
-    
+router.get("/tasks",async (request, response) =>{
+    try{
+        const tasks = await taskService.getTasks();
+
+        return response.json(tasks);
+    }
+    catch(error){
+        console.error(error);
+
+        return response.status(500).json({
+            success: false,
+            message: "Server-side error"
+        });
+    }
 });
 
-router.get("/tasks/:id", (request, response) =>{
-    const id = Number(request.params.id);
+router.get("/tasks/:id", async (request, response) =>{
+    try{
+        const id = Number(request.params.id);
 
-    taskService.getTaskById(id, (err, task) =>{
-        if(err){
-            return response.status(500).json({
+        if(Number.isNaN(id)){
+            return response.status(400).json({
                 success: false,
-                message: "server-side error"
+                message: "ID must be a number"
             });
         }
-        
+
+        const task = await taskService.getTaskById(id);
+
         if(!task){
             return response.status(404).json({
                 success: false,
                 message: "Resource not found"
             });
         }
-        
-        response.json(task);
-    });
+
+        return response.json(task);
+    }
+    catch(error){
+        console.error(error);
+
+        return response.status(500).json({
+            success: false,
+            message: "Server-side error"
+        })
+    }
 });
 
-router.post("/tasks", (request, response) => {
+router.post("/tasks", async (request, response) => {
 
     if(typeof request.body.title != "string" || request.body.title.trim().length === 0){
         return response.status(400).json({
             success: false,
-            message: "Title must be a non empty string"
+             message: "Title must be a non empty string"
         });
     }
-    
 
-    taskService.createTask(request.body.title, (error, newTask) =>{
-        if(error){
-            return response.status(500).json({
-                success: false,
-                message: "Could not create task"
-            })
-        }
-        response.status(201).json(newTask);
-    });
+    try{
+        const title = request.body.title.trim();
 
-        
-    
+        const newTask = await taskService.createTask(title);
+
+        return response.status(201).json(newTask);
+    }
+    catch(error){
+        console.error(error);
+
+        return response.status(500).json({
+            success: false,
+            message: "Server-side error"
+        });
+    }
 });
 
-router.delete("/tasks/:id", (request, response) =>{
+router.delete("/tasks/:id", async (request, response) =>{
     const id = Number(request.params.id);
 
-    taskService.deleteTask(id, (error, newTasks) =>{
-        if(error){
-            return response.status(500).json({
+    if(Number.isNaN(id)){
+        return response.status(400).json({
+            success: false,
+            message: "ID must be a number"
+        });
+    }
+
+    try{
+        const deletedTask = await taskService.deleteTask(id);
+
+        if(!deletedTask){
+            return response.status(404).json({
                 success: false,
-                message: "Server-side error"
+                message: "Resource not found"
             });
         }
 
-        if(!newTasks){
-            console.log("Deletion failed - No id match!");
-            return response.status(404).json({
-                success:false,
-                message: "Resource not found"
-            })
-        }
-         response.json(newTasks);
-    })
+        return response.status(204).send();
+    }
+    catch(error){
+        console.error(error);
+
+        return response.status(500).json({
+            success: false,
+            message: "Server-side error"
+        });
+    }
 })
 
-router.patch("/tasks/:id", (request, response) =>{
+router.patch("/tasks/:id", async (request, response) =>{
     const id = Number(request.params.id);
     const completed = request.body.completed;
 
-    taskService.updateTask(id, completed, (error, updatedTask) =>{
-        if(error){
-            return response.status(500).json({
-                success: false,
-                message: "Server-side error"
-            });
-        }
+    if(Number.isNaN(id)){
+        return response.status(400).json({
+            success: false,
+            message: "ID must be a number"
+        });
+    }
 
+    if(typeof completed !== "boolean"){
+        return response.status(400).json({
+            success: false,
+            message: "Completed must be boolean"
+        })
+    }
+
+    try{
+        const updatedTask = await taskService.updateTask(id, completed);
         if(!updatedTask){
             return response.status(404).json({
                 success: false,
                 message: "Resource not found"
-            })
+            });
         }
+
         return response.json(updatedTask);
-    });
+    }
+    catch(error){
+        console.error(error);
+        
+        return response.status(500).json({
+            success: false,
+            message: "Server-side error"
+        });
+    }
 });
 
 module.exports = router;

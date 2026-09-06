@@ -1,124 +1,121 @@
-const { error } = require("console");
+
 const fs = require("fs");
+const path = require("path");
 
-const TASKS_FILE = "data/tasks.json";
+const DEFAULT_TASKS_FILE = path.join(__dirname, "..", "data", "tasks.json");
+let TASKS_FILE = DEFAULT_TASKS_FILE;
 
-function getTasks(callback) {
-    fs.readFile(TASKS_FILE, (error, data) =>{
-        if(error){
-            callback(error, null);
-            return;
-        }
-
-        const tasks = JSON.parse(data);
-        callback(null, tasks);
-    });
-};
-
-function getTaskById(id, callback) {
-    getTasks((error, tasks) =>{
-        if(error){
-            callback(error, null);
-            return;
-        }
-
-        const task = tasks.find(task => task.id== id);
-
-        if(!task){
-            callback(null,null);
-            return;
-        }
-        callback(null, task);
-
-    });
-};
-
-function createTask(title, callback) {
-    getTasks((error, tasks) =>{
-        if(error){
-            callback(error, null);
-            return;
-        }
-
-        let highestId = 0;
-        tasks.forEach(task =>{
-            if(task.id > highestId){
-                highestId = task.id;
-            }
-        })
-
-        const newTask = {
-            id: highestId+1,
-            title: title,
-            completed: false
-        }
-
-        tasks.push(newTask);
-
-        fs.writeFile(TASKS_FILE, JSON.stringify(tasks), (error) =>{
-            if(error){
-                callback(error,null);
-                return;
-            }
-            callback(null, newTask);
-        })
-
-        console.log("Write to file successfull");
-
-    })
+function setTasksFilePath(filePath){
+    TASKS_FILE = filePath;
 }
 
-function updateTask(id,completed, callback) {
-    getTasks((error, tasks) =>{
-        if(error){
-            callback(error,null);
-            return;
-        }
-
-        const updatedTask = tasks.find(task => task.id === id);
-
-        if(!updatedTask){
-            callback(null, null);
-            return;
-        }
-
-        updatedTask.completed = completed;
-
-        fs.writeFile(TASKS_FILE, JSON.stringify(tasks), (error) =>{
+function getTasks() {
+    return new Promise((resolve, reject) =>{
+        fs.readFile(TASKS_FILE, (error, data)=>{
             if(error){
-                callback(error, null);
+                reject(error);
                 return;
             }
-            callback(null, updatedTask);
-            console.log("successfully updated!");
-        })
+            try{
+                const tasks = JSON.parse(data);
+                if(!Array.isArray(tasks)){
+                    throw new Error("Tasks must be an array");
+                }
 
-    })
+                tasks.forEach(task =>{
+                    if(typeof task.id !== "number" || typeof task.title !== "string" || typeof task.completed !== "boolean"){
+                        throw new Error("Invalid task data");
+                    }
+                });
+
+                resolve(tasks);
+            }
+            catch(error){
+                reject(error);
+            }
+        });
+    });
+}
+
+async function getTaskById(id) {
+    const tasks = await getTasks();
+
+    const task = tasks.find(task => task.id === id);
+
+    if(!task){
+        return null;
+    }
+
+    return task;
+}
+
+async function createTask(title) {
+    const tasks = await getTasks();
+
+    let highestId = 0;
+    tasks.forEach(task =>{
+        if(task.id > highestId){
+            highestId = task.id;
+        }
+    });
+
+    const newTask = {
+        id: highestId + 1,
+        title: title,
+        completed: false
+    }
+
+    tasks.push(newTask);
+
+    await writeTasks(tasks);
+
+    return newTask;
+
+}
+
+async function updateTask(id, completed) {
+    const tasks = await getTasks();
+
+    const updatedTask = tasks.find(task => task.id === id);
+
+    if(!updatedTask){
+        return null;
+    }
+
+    updatedTask.completed = completed;
+
+    await writeTasks(tasks);
+
+    return updatedTask;
+}
+
+async function deleteTask(id) {
+    const tasks = await getTasks();
+
+    const deletedTask = tasks.find(task => task.id === id);
+
+    if(!deletedTask){
+        return null;
+    }
+
+    const newTasks = tasks.filter(task => task.id !==id);
+
+    await writeTasks(newTasks);
+
+    return deletedTask;
     
 }
 
-function deleteTask(id, callback) {
-    getTasks((error, tasks) =>{
-        if(error){
-            callback(error, null);
-            return;
-        }
-        
-        const newTasks = tasks.filter(task => task.id !== id);
-
-        if(newTasks.length === tasks.length){
-            callback(null, null);
-            return;
-        }
-
-        fs.writeFile(TASKS_FILE, JSON.stringify(newTasks), error =>{
+function writeTasks(tasks){
+    return new Promise((resolve, reject) =>{
+        fs.writeFile(TASKS_FILE, JSON.stringify(tasks), error =>{
             if(error){
-                callback(error, null);
+                reject(error);
                 return;
             }
-            callback(null, newTasks);
-        })
-    })
+            resolve();
+        });
+    });
 }
 
 module.exports = {
@@ -126,5 +123,7 @@ module.exports = {
     getTaskById,
     createTask,
     updateTask,
-    deleteTask
+    deleteTask,
+    setTasksFilePath,
+    writeTasks
 };

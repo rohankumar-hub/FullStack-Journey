@@ -22,6 +22,4 @@ app.use(taskRoutes);
 
 app.use(express.static("public"));
 
-app.listen(3000, ()=>{
-    console.log("Express server running on http://localhost:3000");
-});
+module.exports = app;
