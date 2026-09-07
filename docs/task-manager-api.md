@@ -489,3 +489,6 @@ The API communication responsibilities were separated into `createTask()`, `togg
 `addTaskToPage()` now creates the UI using `createTaskUI()` and sets up the toggle and delete event handlers, which use `toggleTask()` and `deleteTask()`.
 
 `addTaskToPage()` acts somewhat like a manager. It coordinates the different functions without implementing all of their internal work itself.
+
+Separated the API communication responsibilities into `api.js` and the UI/DOM responsibilities into `ui.js` to make the code easier to navigate and maintain. `script.js` now imports functions from `api.js` for backend communication and functions from `ui.js` for UI/DOM work.
+
