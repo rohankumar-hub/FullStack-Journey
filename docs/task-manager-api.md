@@ -7,7 +7,7 @@ A REST API for managing tasks. The API supports creating, reading, updating, and
 * Get all tasks
 * Get a single task by ID
 * Create a task
-* Update a task's completion status
+* Update a task's title and completion status
 * Delete a task
 * Persistent storage using a JSON file
 * Separate route and service layers
@@ -64,7 +64,7 @@ Contains the frontend files that communicate with the API.
 | GET    | `/tasks`     | Get all tasks            | `200`   |
 | GET    | `/tasks/:id` | Get one task             | `200`   |
 | POST   | `/tasks`     | Create a task            | `201`   |
-| PATCH  | `/tasks/:id` | Update completion status | `200`   |
+| PATCH  | `/tasks/:id` | Partially update a task  | `200`   |
 | DELETE | `/tasks/:id` | Delete a task            | `204`   |
 
 Common error responses:
@@ -225,12 +225,23 @@ After the write succeeds, `createTask()` returns the new task.
 
 # PATCH `/tasks/:id`
 
-Updates a task's completion status.
+Partially updates a task's title and/or completion status.
 
 ### Request body
 
+A task can be partially updated by providing one or more supported properties.
+
 ```json
 {
+  "completed": true
+}
+
+{
+  "title": "Learn Express"
+}
+
+{
+  "title": "Learn Express",
   "completed": true
 }
 ```
@@ -242,15 +253,17 @@ Client
   ↓
 PATCH /tasks/:id
   ↓
-Validate completed
+Validate request
   ↓
-taskService.updateTask(id, completed)
+Build updates object
+  ↓
+taskService.updateTask(id, updates)
   ↓
 getTasks()
   ↓
 find task
   ↓
-modify completed
+modify provided properties
   ↓
 writeTasks(tasks)
   ↓
@@ -259,9 +272,9 @@ return updatedTask
 200 OK
 ```
 
-The route first validates that `completed` is a boolean.
+The route first validates that request including the ID, the presence of atleast one update field, and the types and values of `title` and `completed`.
 
-If it isn't, the route returns `400`.
+If the input is invalid, the route returns `400`.
 
 If the task doesn't exist, `updateTask()` returns `null`, which the route converts into `404`.
 
@@ -275,7 +288,7 @@ If an error occurs, the route returns `500`.
 
 If the task doesn't exist, it returns `null`.
 
-If it exists, its `completed` property is changed.
+If it exists, the function checks which properties were provided in the `updates` object and changes those properties .
 
 The entire tasks array is then passed to `writeTasks()` so the modified task is persisted to the file.
 
@@ -490,5 +503,5 @@ The API communication responsibilities were separated into `createTask()`, `togg
 
 `addTaskToPage()` acts somewhat like a manager. It coordinates the different functions without implementing all of their internal work itself.
 
-Separated the API communication responsibilities into `api.js` and the UI/DOM responsibilities into `ui.js` to make the code easier to navigate and maintain. `script.js` now imports functions from `api.js` for backend communication and functions from `ui.js` for UI/DOM work.
+I separated the API communication responsibilities into `api.js` and the UI/DOM responsibilities into `ui.js` to make the code easier to navigate and maintain. `script.js` now imports functions from `api.js` for backend communication and functions from `ui.js` for UI/DOM work.
 

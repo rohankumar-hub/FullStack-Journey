@@ -53,8 +53,8 @@ test("createTask creates a new task", async () => {
     });
 });
 
-test("updates the completed status of task 1 to true", async () =>{
-    const updatedTask = await taskService.updateTask(1, true);
+test("updateTask() updates the completed status of task 1 to true", async () =>{
+    const updatedTask = await taskService.updateTask(1, {completed: true});
 
     assert.deepStrictEqual(updatedTask, {
         id: 1,
@@ -63,8 +63,28 @@ test("updates the completed status of task 1 to true", async () =>{
     });
 })
 
+test("updateTask() updates the title of task 1 to titlechanged", async () =>{
+    const updatedTask = await taskService.updateTask(1, {title: "titlechanged"});
+
+    assert.deepStrictEqual(updatedTask, {
+        id: 1,
+        title: "titlechanged",
+        completed: false
+    });
+})
+
+test("updateTask() updates both title and completed of task 1", async () =>{
+    const updatedTask = await taskService.updateTask(1, {title: "titlechanged", completed: true});
+
+    assert.deepStrictEqual(updatedTask, {
+        id: 1,
+        title: "titlechanged",
+        completed: true
+    });
+})
+
 test("updateTask() returns null when the task doesn't exist", async ()=>{
-    const updatedTask = await taskService.updateTask(98, true);
+    const updatedTask = await taskService.updateTask(98, {completed: true});
 
     assert.strictEqual(updatedTask, null);
 })
@@ -86,7 +106,7 @@ test("deleteTask returns null when the task doesn't exist", async () =>{
 })
 
 test("checks the persistence of the data by updateTask()", async () =>{
-    await taskService.updateTask(1, true);
+    await taskService.updateTask(1, {completed: true});
     const task = await taskService.getTaskById(1);
 
     assert.deepStrictEqual(task, {

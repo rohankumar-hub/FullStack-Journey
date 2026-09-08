@@ -128,6 +128,70 @@ test("PATCH /tasks/:id updates the completed status", async () =>{
     assert.strictEqual(task.completed, true);
 });
 
+test("PATCH /tasks/:id updates the title", async () =>{
+    const response = await fetch(`${baseURL}/tasks/2`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            title: "titlechanged"
+        })
+    });
+
+    assert.strictEqual(response.status, 200);
+
+    const task = await response.json();
+
+    assert.strictEqual(task.title, "titlechanged");
+});
+
+test("PATCH /tasks/:id updates both the title and completed status", async () =>{
+    const response = await fetch(`${baseURL}/tasks/2`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            title: "titlechanged",
+            completed: true
+        })
+    });
+
+    assert.strictEqual(response.status, 200);
+
+    const task = await response.json();
+
+    assert.strictEqual(task.title, "titlechanged");
+    assert.strictEqual(task.completed, true);
+});
+
+test("PATCH /tasks/:id returns 400 nothing is given", async () =>{
+    const response = await fetch(`${baseURL}/tasks/2`,{
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({})
+    });
+
+    assert.strictEqual(response.status, 400);
+});
+
+test("PATCH /tasks/:id returns 400 when the title is just spaces", async () =>{
+    const response = await fetch(`${baseURL}/tasks/2`,{
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            title: "    "
+        })
+    });
+
+    assert.strictEqual(response.status, 400);
+});
+
 test("PATCH /tasks/:id returns 404 when the task doesn't exist", async () =>{
     const response = await fetch(`${baseURL}/tasks/87`,{
         method: "PATCH",
@@ -150,6 +214,20 @@ test("PATCH /tasks/:id returns 400 when the completed is invalid", async () =>{
         },
         body: JSON.stringify({
             completed: "ha"
+        })
+    });
+
+    assert.strictEqual(response.status, 400);
+});
+
+test("PATCH /tasks/:id returns 400 when the title is invalid", async () =>{
+    const response = await fetch(`${baseURL}/tasks/2`,{
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            title: true
         })
     });
 

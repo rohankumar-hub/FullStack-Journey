@@ -73,7 +73,7 @@ async function createTask(title) {
 
 }
 
-async function updateTask(id, completed) {
+async function updateTask(id, updates) {
     const tasks = await getTasks();
 
     const updatedTask = tasks.find(task => task.id === id);
@@ -82,7 +82,13 @@ async function updateTask(id, completed) {
         return null;
     }
 
-    updatedTask.completed = completed;
+    if(updates.completed !== undefined){
+        updatedTask.completed = updates.completed;
+    }
+
+    if(updates.title !== undefined){
+        updatedTask.title = updates.title;
+    }
 
     await writeTasks(tasks);
 

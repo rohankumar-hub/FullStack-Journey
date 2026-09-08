@@ -113,6 +113,7 @@ router.delete("/tasks/:id", async (request, response) =>{
 router.patch("/tasks/:id", async (request, response) =>{
     const id = Number(request.params.id);
     const completed = request.body.completed;
+    const title = request.body.title;
 
     if(Number.isNaN(id)){
         return response.status(400).json({
@@ -121,15 +122,46 @@ router.patch("/tasks/:id", async (request, response) =>{
         });
     }
 
-    if(typeof completed !== "boolean"){
+    if(completed == undefined && title == undefined){
+        return response.status(400).json({
+            success: false,
+            message: "Invalid request"
+        })
+    }
+
+    if(completed !== undefined && typeof completed !== "boolean"){
         return response.status(400).json({
             success: false,
             message: "Completed must be boolean"
         })
     }
 
+    if(title !== undefined && typeof title !== "string"){
+        return response.status(400).json({
+            success: false,
+            message: "Title must be a string"
+        })
+    }
+
+    if(title !== undefined && title.trim().length === 0){
+        return response.status(400).json({
+            success: false,
+             message: "Title must be a non empty string"
+        });
+    }
+
+    const updates = {};
+    
+    if(title !== undefined){
+        updates.title = title.trim();
+    }
+
+    if( completed !== undefined){
+        updates.completed = completed;
+    }
+
     try{
-        const updatedTask = await taskService.updateTask(id, completed);
+        const updatedTask = await taskService.updateTask(id, updates);
         if(!updatedTask){
             return response.status(404).json({
                 success: false,
