@@ -72,4 +72,24 @@ async function toggleTask(taskId){
   return updatedTask;
 }
 
-export { getTasks, createTask, deleteTask, toggleTask };
+async function updateTaskTitle(taskId, taskTitle){
+  const response = await fetch(`/tasks/${taskId}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      title: taskTitle
+    })
+  });
+
+  if(!response.ok){
+    throw new Error("failed to update title");
+  }
+
+  const updatedTask = await response.json();
+
+  return updatedTask;
+}
+
+export { getTasks, createTask, deleteTask, toggleTask, updateTaskTitle};

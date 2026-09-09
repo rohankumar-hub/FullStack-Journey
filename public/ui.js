@@ -7,6 +7,9 @@ function createTaskUI(task){
   updateTaskTitleStyle(title, task.completed);
   title.style.marginRight = '15px';
 
+  const buttonForEdit = document.createElement("button");
+  buttonForEdit.textContent = "Edit";
+
   const buttonForToggle = document.createElement("button");
   updateToggleButton(buttonForToggle, task.completed);
   buttonForToggle.style.marginRight = '15px';
@@ -20,11 +23,12 @@ function createTaskUI(task){
   taskStatus.style.marginRight = "15px";
 
   row.appendChild(title);
+  row.appendChild(buttonForEdit);
   row.appendChild(taskStatus);
   row.appendChild(buttonForToggle);
   row.appendChild(buttonForDelete);
 
-  return{ row, title, buttonForToggle, buttonForDelete, taskStatus};
+  return{ row, title, buttonForEdit, buttonForToggle, buttonForDelete, taskStatus};
 }
 
 function updateTaskTitleStyle(title, completed){
@@ -39,4 +43,27 @@ function updateTaskStatus(taskStatus, completed){
   taskStatus.textContent = completed? "Completed" : "Pending";
 }
 
-export { createTaskUI, updateTaskStatus, updateTaskTitleStyle, updateToggleButton};
+function createEditTaskUI(taskTitle){
+
+  const editBox = document.createElement("div");
+
+  const editTaskInput = document.createElement("input");
+  editTaskInput.value = taskTitle;
+
+  const buttonForSave = document.createElement("button");
+  buttonForSave.textContent = "Save";
+
+  const buttonForCancel = document.createElement("button");
+  buttonForCancel.textContent = "Cancel";
+
+  const errorMessageBox = document.createElement("p");
+
+  editBox.appendChild(editTaskInput);
+  editBox.appendChild(buttonForSave);
+  editBox.appendChild(buttonForCancel);
+  editBox.appendChild(errorMessageBox);
+
+  return { editBox, editTaskInput, buttonForSave, buttonForCancel, errorMessageBox};
+}
+
+export { createTaskUI, updateTaskStatus, updateTaskTitleStyle, updateToggleButton, createEditTaskUI};

@@ -505,3 +505,10 @@ The API communication responsibilities were separated into `createTask()`, `togg
 
 I separated the API communication responsibilities into `api.js` and the UI/DOM responsibilities into `ui.js` to make the code easier to navigate and maintain. `script.js` now imports functions from `api.js` for backend communication and functions from `ui.js` for UI/DOM work.
 
+# Added new feature : Edit title
+
+I added a new Edit button to the frontend. `script.js` handles the logic of the Edit button. Two new functions `createEditTaskUI()` and `updateTaskTitle` were created to handle the UI and API logic of the Edit feature.
+
+`createEditTaskUI()` initializes the DOM elements needed for the editing a task title. 
+`updateTaskTitle()` sends the new title to the backend to update the task.
+if an error occurs, it is displayed within the `errorMessageBox`.

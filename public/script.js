@@ -1,5 +1,5 @@
-import { getTasks, createTask, deleteTask, toggleTask } from "./api.js";
-import { createTaskUI, updateTaskStatus, updateTaskTitleStyle, updateToggleButton } from "./ui.js";
+import { getTasks, createTask, deleteTask, toggleTask, updateTaskTitle} from "./api.js";
+import { createTaskUI, updateTaskStatus, updateTaskTitleStyle, updateToggleButton, createEditTaskUI} from "./ui.js";
 
 const addTaskButton = document.getElementById("addTaskButton");
 const taskInput = document.getElementById("taskInput");
@@ -76,6 +76,46 @@ function addTaskToPage(task){
       errorMessageBox.textContent = "Something went wrong. Please try again";
     }
   });
+
+  taskUI.buttonForEdit.addEventListener("click", () =>{
+    //create title input with save and cancel button
+    //replace title input box with title text
+    //functionality of save and cancel button 
+
+    //createtaskUI()
+    const editTaskUI = createEditTaskUI(task.title);
+
+    taskUI.title.replaceWith(editTaskUI.editBox);
+
+    taskUI.buttonForEdit.style.display = "none";
+
+    editTaskUI.buttonForSave.addEventListener("click", async () =>{
+      try{
+        if(editTaskUI.editTaskInput.value.trim().length === 0){
+          editTaskUI.errorMessageBox.textContent = "Title must be a non-empty string";
+          return;
+        }
+
+        const updatedTask = await updateTaskTitle(task.id, editTaskUI.editTaskInput.value.trim());
+        taskUI.title.textContent = updatedTask.title;
+        editTaskUI.editBox.replaceWith(taskUI.title);
+        taskUI.buttonForEdit.style.display = "";
+        task.title = updatedTask.title;
+        editTaskUI.errorMessageBox.textContent = "";
+      }
+      catch(error){
+        console.error(error);
+        editTaskUI.errorMessageBox.textContent = "Something went wrong. Please try again";
+      }
+    })
+
+    editTaskUI.buttonForCancel.addEventListener("click", () =>{
+      editTaskUI.editBox.replaceWith(taskUI.title);
+      taskUI.buttonForEdit.style.display = "";
+      editTaskUI.errorMessageBox.textContent = "";
+    })
+
+  })
 
   taskcontainer.appendChild(taskUI.row);
 };
