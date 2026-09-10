@@ -512,3 +512,14 @@ I added a new Edit button to the frontend. `script.js` handles the logic of the 
 `createEditTaskUI()` initializes the DOM elements needed for the editing a task title. 
 `updateTaskTitle()` sends the new title to the backend to update the task.
 if an error occurs, it is displayed within the `errorMessageBox`.
+
+# Added new feature : Search
+
+I added a search input to the frontend. It works as the user types. A taskItems array is used to store the reference to the task and it's corresponding taskUI. For every task that was loaded in the page, it's task and taskUI references are pushed into the array inside `addTaskToPage()`.
+
+Added an input event listener to the search input. It calls `searchTaskItem()` to handle the search logic.
+
+`searchTaskItem()` iterates through the taskItems array and hides tasks whose title doesn't contain the search text. Matching tasks remain visible.
+
+`searchTaskItem()` is also called after a task is added or its title is editted so that the current search filter is reapplied . When a task is deleted, its corresponding `{task and taskUI}` object is also removed from the `taskItems` array.
+

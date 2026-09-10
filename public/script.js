@@ -7,12 +7,17 @@ const errorMessageBox = document.getElementById("errorMessageBox");
 
 const taskcontainer= document.getElementById("tasks");
 
+const searchInput = document.getElementById("searchInput");
+
+const taskItems =[];
 
 async function loadTasks(){
   try{
     const tasks = await getTasks();
 
     taskcontainer.replaceChildren();
+
+    taskItems.length = 0;
 
     tasks.forEach(task => {
       addTaskToPage(task);
@@ -41,6 +46,7 @@ addTaskButton.addEventListener("click", async () =>{
     taskInput.value = "";
     errorMessageBox.textContent = "";
 
+    searchTaskItem(searchInput.value.trim().toLowerCase());
   }
   catch(error){
     console.error(error);
@@ -58,6 +64,8 @@ function addTaskToPage(task){
       updateTaskStatus(taskUI.taskStatus, updatedTask.completed);
       updateTaskTitleStyle(taskUI.title, updatedTask.completed);
       updateToggleButton(taskUI.buttonForToggle, updatedTask.completed);
+
+      task.completed = updatedTask.completed;
     }
     catch(error){
       console.log(error);
@@ -70,6 +78,9 @@ function addTaskToPage(task){
       await deleteTask(task.id);
 
       taskUI.row.remove();
+
+      //for search feature
+      deleteTaskItemFromTaskItems(task.id);
     }
     catch(error){
       console.error(error);
@@ -78,11 +89,6 @@ function addTaskToPage(task){
   });
 
   taskUI.buttonForEdit.addEventListener("click", () =>{
-    //create title input with save and cancel button
-    //replace title input box with title text
-    //functionality of save and cancel button 
-
-    //createtaskUI()
     const editTaskUI = createEditTaskUI(task.title);
 
     taskUI.title.replaceWith(editTaskUI.editBox);
@@ -102,6 +108,8 @@ function addTaskToPage(task){
         taskUI.buttonForEdit.style.display = "";
         task.title = updatedTask.title;
         editTaskUI.errorMessageBox.textContent = "";
+
+        searchTaskItem(searchInput.value.trim().toLowerCase());
       }
       catch(error){
         console.error(error);
@@ -117,8 +125,35 @@ function addTaskToPage(task){
 
   })
 
+  taskItems.push({task, taskUI});
+
   taskcontainer.appendChild(taskUI.row);
-};
+}
 
+function deleteTaskItemFromTaskItems(taskId){
+  const index = taskItems.findIndex(taskItem => taskItem.task.id === taskId);
 
+  if(index === -1){
+    console.log("Failed to delete taskItem");
+    return;
+  }
+
+  taskItems.splice(index, 1);
+}
+
+searchInput.addEventListener("input", () =>{
+  const searchText = searchInput.value.trim().toLowerCase()
   
+  searchTaskItem(searchText);
+})
+
+function searchTaskItem(searchText){
+  taskItems.forEach(taskItem => {
+    if(!taskItem.task.title.toLowerCase().includes(searchText)){
+      taskItem.taskUI.row.style.display = "none";
+    }
+    else{
+      taskItem.taskUI.row.style.display = "";
+    }
+  });
+}
