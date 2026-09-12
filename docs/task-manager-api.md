@@ -515,11 +515,22 @@ if an error occurs, it is displayed within the `errorMessageBox`.
 
 # Added new feature : Search
 
-I added a search input to the frontend. It works as the user types. A taskItems array is used to store the reference to the task and it's corresponding taskUI. For every task that was loaded in the page, it's task and taskUI references are pushed into the array inside `addTaskToPage()`.
+I added a search input to the frontend. It works as the user types. A taskItems array is used to store the reference to the task and its corresponding taskUI reference. For each task, its task and taskUI reference are pushed to the array inside `addTaskToPage()` .
 
 Added an input event listener to the search input. It calls `searchTaskItem()` to handle the search logic.
 
 `searchTaskItem()` iterates through the taskItems array and hides tasks whose title doesn't contain the search text. Matching tasks remain visible.
 
-`searchTaskItem()` is also called after a task is added or its title is editted so that the current search filter is reapplied . When a task is deleted, its corresponding `{task and taskUI}` object is also removed from the `taskItems` array.
+`searchTaskItem()` is also called after a task is added or its title is edited so that the current search filter is reapplied . When a task is deleted, its corresponding `{task, taskUI}` object is also removed from the `taskItems` array.
 
+# Added task filtering feature
+
+The search filter has been integrated(updated) with a completion status filter. I made a `filterTasks()` function(replacing the old `searchTaskItem()`). It takes the search text and selected completion filter value as parameters. 
+It iterates through the `taskItems` array. 
+If no filter is applied(default filter) the task whose title doesn't contain the search text is hidden. Matching tasks remain visible.
+If a filter is applied(true or false), a task remains visible only if both its title matches the search text and its completed status matches the selected filter. Matching tasks remain visible.
+
+Also added a helper function `updateTaskFilter()`. It reads the current filter state and reapplies the filter.
+The filter is reapplied after a task is added, edited or toggled.
+
+This filter is only on the client-side. No API request are made.

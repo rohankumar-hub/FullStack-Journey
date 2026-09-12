@@ -46,7 +46,7 @@ addTaskButton.addEventListener("click", async () =>{
     taskInput.value = "";
     errorMessageBox.textContent = "";
 
-    searchTaskItem(searchInput.value.trim().toLowerCase());
+    updateTaskFilter();
   }
   catch(error){
     console.error(error);
@@ -66,6 +66,9 @@ function addTaskToPage(task){
       updateToggleButton(taskUI.buttonForToggle, updatedTask.completed);
 
       task.completed = updatedTask.completed;
+
+      updateTaskFilter();
+
     }
     catch(error){
       console.log(error);
@@ -109,7 +112,8 @@ function addTaskToPage(task){
         task.title = updatedTask.title;
         editTaskUI.errorMessageBox.textContent = "";
 
-        searchTaskItem(searchInput.value.trim().toLowerCase());
+        updateTaskFilter();
+        
       }
       catch(error){
         console.error(error);
@@ -142,18 +146,48 @@ function deleteTaskItemFromTaskItems(taskId){
 }
 
 searchInput.addEventListener("input", () =>{
-  const searchText = searchInput.value.trim().toLowerCase()
-  
-  searchTaskItem(searchText);
+
+  updateTaskFilter();
+
 })
 
-function searchTaskItem(searchText){
-  taskItems.forEach(taskItem => {
-    if(!taskItem.task.title.toLowerCase().includes(searchText)){
-      taskItem.taskUI.row.style.display = "none";
+const completedFilterRadioButtons = document.querySelectorAll("input[name='completedFilter']");
+
+completedFilterRadioButtons.forEach(radio =>{
+  radio.addEventListener("change", () =>{
+    updateTaskFilter();
+  });
+});
+
+function filterTasks(searchText, completedFilter){
+  
+  taskItems.forEach(taskItem =>{
+    const taskTitle = taskItem.task.title.toLowerCase();
+    const taskCompleted = taskItem.task.completed;
+    const rowStyle = taskItem.taskUI.row.style;
+    const selectedCompleted = (completedFilter === "true");
+
+    if(completedFilter === ""){
+      if(taskTitle.includes(searchText)){
+        rowStyle.display = "";
+      }
+      else{
+        rowStyle.display = "none";
+      }
+      return;
+    }
+
+    if(taskTitle.includes(searchText) && taskCompleted === selectedCompleted){
+      rowStyle.display = "";
     }
     else{
-      taskItem.taskUI.row.style.display = "";
+      rowStyle.display = "none";
     }
   });
+}
+
+function updateTaskFilter(){
+  const searchText = searchInput.value.trim().toLowerCase();
+  const completedFilter = document.querySelector('input[name = "completedFilter"]:checked')?.value;
+  filterTasks(searchText, completedFilter); 
 }
